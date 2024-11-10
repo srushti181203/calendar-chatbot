@@ -1,60 +1,27 @@
 'use strict';
-
 // Import the Dialogflow module from Google client libraries.
 const functions = require('firebase-functions');
-const { google } = require('googleapis'); // Correct import for googleapis
+const { google } = require('googleapis');
 const { WebhookClient } = require('dialogflow-fulfillment');
-
-/*const express = require('express')
-const bodyparser = require('body-parser')
-const app =express()
-app.use(bodyparser.json())
-const port = process.env.PORT || 3000
-app.post('/dialogflow-fulfillment', (request, response)=> {
-   dialogflowFulfillment(request,response)
-})
-app.listen(port, () => {
-    console.log(`Lisrening on port ${port}`)
-})
-const dialogflowFulfillment = (request , response)=> {
-    const agent = new WebhookClient({request, response})
-
-  function sayhello(agent){
-        agent.add('hi there this response coming from heroku  ')
-    }
-
-    let intentMap = new Map();
-    intentMap.set("Default Welcome Intent ",sayhello)
-    agent.handleRequest(intentMap)
-}*/
-
-
-
 // Enter your calendar ID below and service account JSON below
 // Enter your calendar ID below and service account JSON below
-const calendarId = "enter your calander id ";
-const serviceAccount = { "enter your service account details "
-}; // Starts with {"type": "service_account",...
-
+const calendarId = "<INSERT YOUR CALENDAR ID>";
+const serviceAccount = {<INSERT CONTENTS OF YOUr JSON FILE HERE>}; // Starts with {"type": "service_account",...
 // Set up Google Calendar Service account credentials
 const serviceAccountAuth = new google.auth.JWT({
     email: serviceAccount.client_email,
     key: serviceAccount.private_key,
     scopes: 'https://www.googleapis.com/auth/calendar'
 });
-
 const calendar = google.calendar('v3');
 process.env.DEBUG = 'dialogflow:*'; // enables lib debugging statements
-
 const timeZone = 'America/Los_Angeles';
 const timeZoneOffset = '-07:00';
-
 // Set the DialogflowApp object to handle the HTTPS POST request.
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, response) => {
     const agent = new WebhookClient({ request, response });
     console.log("Parameters", agent.parameters);
     const appointment_type = agent.parameters.AppointmentType;
-
     function makeAppointment(agent) {
         // Calculate appointment start and end datetimes (end = +1hr from start)
         const dateTimeStart = new Date(new Date(Date.parse(agent.parameters.date.split('T')[0] + 'T' + agent.parameters.time.split('T')[1].split('-')[0])));
@@ -73,13 +40,11 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add(`I'm sorry, there are no slots available for ${appointmentTimeString}.`);
         });
     }
-
     // Handle the Dialogflow intent named 'Schedule Appointment'.
     let intentMap = new Map();
     intentMap.set('schedule appointment', makeAppointment);
     agent.handleRequest(intentMap);
 });
-
 //Creates calendar event in Google Calendar
 function createCalendarEvent(dateTimeStart, dateTimeEnd, appointment_type) {
     return new Promise((resolve, reject) => {
