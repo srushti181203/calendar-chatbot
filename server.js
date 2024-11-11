@@ -1,10 +1,10 @@
-const http = require('http');
+const express = require('express');
+const app = express();
 const index = require('./index');
-const { hostname } = require('os');
+const port = process.env.PORT || 5000;
 
-const port= process.env.PORT || 5000;
-const server = http.createServer(index);
+app.use('/', index);
 
-server.listen(port, () => {
-    console.log(`started on port ${port}`);
+app.listen(port, "0.0.0.0", () => {
+  console.log(`Server started on port ${port}`);
 });
